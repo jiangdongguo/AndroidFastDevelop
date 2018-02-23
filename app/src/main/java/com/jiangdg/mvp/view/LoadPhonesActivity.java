@@ -8,7 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 
 import com.jiangdg.mvp.R;
-import com.jiangdg.mvp.adapter.LoadPhonesAdapter;
+import com.jiangdg.mvp.view.adapter.LoadPhonesAdapter;
 import com.jiangdg.mvp.bean.PhoneInfoBean;
 import com.jiangdg.mvp.presenter.LoadPhonesPresenter;
 
