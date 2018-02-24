@@ -15,3 +15,7 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+# okhttp混淆规则
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**

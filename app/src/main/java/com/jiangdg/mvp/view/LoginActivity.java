@@ -3,6 +3,7 @@ package com.jiangdg.mvp.view;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -11,6 +12,7 @@ import android.widget.Toast;
 import com.jiangdg.mvp.R;
 import com.jiangdg.mvp.bean.UserInfoBean;
 import com.jiangdg.mvp.presenter.LoginPresenter;
+import com.jiangdg.mvp.utils.common.AppManagerUtil;
 
 /** 用户登录界面
  *

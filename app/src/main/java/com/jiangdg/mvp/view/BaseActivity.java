@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.jiangdg.mvp.presenter.BasePresenter;
+import com.jiangdg.mvp.utils.common.ActivityStackManager;
 
 /**Activity基类
  *
@@ -22,6 +23,8 @@ public abstract class BaseActivity<V,T extends BasePresenter<V>> extends AppComp
         mPresenter = createPresenter();
         // 绑定view
         mPresenter.attachView((V)this);
+        // Activity入栈
+        ActivityStackManager.getInstance().pushActivity(this);
     }
 
     protected abstract T createPresenter();
@@ -32,5 +35,7 @@ public abstract class BaseActivity<V,T extends BasePresenter<V>> extends AppComp
         if(mPresenter != null){
             mPresenter.dettachView();
         }
+        // Activity出栈
+        ActivityStackManager.getInstance().popActivity();
     }
 }
