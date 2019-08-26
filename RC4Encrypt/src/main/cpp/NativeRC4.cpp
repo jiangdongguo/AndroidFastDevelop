@@ -17,7 +17,7 @@ void create_key_stream(char *keyStream, int lenBytes);
 char S[256]; // 向量S
 char T[256]; // 向量T
 bool isDebug = true;
-const char *key_default = "teliegn@jiangdg"; // 默认密钥
+const char *key_default = "jiangdongguo"; // 默认密钥
 
 
 extern "C"
