@@ -56,15 +56,20 @@ public class H264DecodeThread extends Thread {
                         e.printStackTrace();
                     }
                     // 判断关键帧和非关键帧，解密后，再解码
-                    int type = h264[4] & 0x1F;
-                    int countStartHeader = 5;
-                    if(type == 5 || type == 1) {
-                        RC4Utils.rc4DecryptData(h264, countStartHeader, h264.length-countStartHeader);
-                    }
+                    if(h264.length > 0) {
+                        int type = h264[4] & 0x1F;
+                        int countStartHeader = 5;
+                        if(type == 5) {
+                            RC4Utils.rc4DecryptData(h264, countStartHeader, h264.length-countStartHeader);
+                        }
+//                        if(type == 5 || type == 1) {
+//                            RC4Utils.rc4DecryptData(h264, countStartHeader, h264.length-countStartHeader);
+//                        }
 
-                    // 将数据写入缓存区，然后再提交到解码器
-                    inputBuffer.clear();
-                    inputBuffer.put(h264);
+                        // 将数据写入缓存区，然后再提交到解码器
+                        inputBuffer.clear();
+                        inputBuffer.put(h264);
+                    }
                 }
                 mDecodeCodec.queueInputBuffer(inputIndex, 0, h264.length, System.nanoTime()/1000, 0);
             }
@@ -83,7 +88,7 @@ public class H264DecodeThread extends Thread {
                 } else if(outputIndex > 0) {
                     mDecodeCodec.releaseOutputBuffer(outputIndex, true);
                 }
-            }while (outputIndex>=0);
+            }while (outputIndex>=0 && !isExit);
         }
     }
 

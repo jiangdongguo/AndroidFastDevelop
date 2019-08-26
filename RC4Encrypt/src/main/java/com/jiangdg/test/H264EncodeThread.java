@@ -7,6 +7,8 @@ import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.os.Build;
 import android.os.Environment;
+import android.util.Log;
+
 import com.jiangdg.natives.RC4Utils;
 
 import java.io.IOException;
@@ -29,6 +31,7 @@ public class H264EncodeThread extends Thread{
     // 队列
     private ArrayBlockingQueue mQueue;
     private OnEncodeResultListener mListener;
+    private boolean isCodecStart;
 
     // 数据回调监听器
     public interface OnEncodeResultListener{
@@ -111,7 +114,8 @@ public class H264EncodeThread extends Thread{
                             outData = iframeData;
                         } else if(naluType == 1){
                             // 加密非关键帧负载
-                            RC4Utils.rc4EncryptData(outData, countStartHeader, outData.length-countStartHeader);
+                            // 注：尝试对非关键字加密，解密解码渲染会出现马赛克，这里自己还没有想清楚原因
+//                            RC4Utils.rc4EncryptData(outData, countStartHeader, outData.length-countStartHeader);
                         }
                         // 将编码H264数据回调
                         if(mListener != null) {
@@ -121,7 +125,7 @@ public class H264EncodeThread extends Thread{
                     }
                     mEncodeCodec.releaseOutputBuffer(outputIndex, false);
                 }
-            }while (outputIndex >= 0);
+            }while (outputIndex >= 0 && !isExit);
         }
         FileUtils.releaseFile();
         releaseEncodeCodec();
@@ -139,6 +143,7 @@ public class H264EncodeThread extends Thread{
             mEncodeCodec = MediaCodec.createEncoderByType(MIME);
             mEncodeCodec.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             mEncodeCodec.start();
+            isCodecStart = true;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -146,7 +151,7 @@ public class H264EncodeThread extends Thread{
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void setFrameData(byte[] rawFrame) {
-        if(mQueue != null) {
+        if(mQueue != null && isCodecStart) {
             try {
                 mQueue.put(nv21ToYuv420sp(rawFrame));
             } catch (InterruptedException e) {
@@ -170,6 +175,8 @@ public class H264EncodeThread extends Thread{
             mEncodeCodec.release();
             mEncodeCodec = null;
         }
+        isExit = false;
+        isCodecStart = false;
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)

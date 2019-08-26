@@ -108,9 +108,9 @@ public class CameraManager {
 
     public void stopPreview() {
         if(mCamera != null) {
-            mCamera.stopPreview();
             try {
                 mCamera.setPreviewDisplay(null);
+                mCamera.stopPreview();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -119,11 +119,9 @@ public class CameraManager {
 
     public void closeCamera() {
         if(mCamera != null) {
+            mCamera.lock();
             mCamera.release();
             mCamera = null;
-        }
-        if(mActivityWf != null) {
-            mActivityWf.clear();
         }
     }
 }

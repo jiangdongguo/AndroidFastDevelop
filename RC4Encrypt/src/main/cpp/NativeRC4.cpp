@@ -12,11 +12,12 @@
 void init_S();
 void init_key(const char *key);
 void premute_S();
-void create_key_stream(int *keyStream, int textLen);
+void create_key_stream(char *keyStream, int lenBytes);
 
-int S[256]; // 向量S
-int T[256]; // 向量T
-const char *key_default = "jiangdongguo"; // 默认密钥
+char S[256]; // 向量S
+char T[256]; // 向量T
+bool isDebug = true;
+const char *key_default = "teliegn@jiangdg"; // 默认密钥
 
 
 extern "C"
@@ -28,12 +29,14 @@ Java_com_jiangdg_natives_RC4Utils_nativeRc4Encrypt(JNIEnv *env, jclass type, jst
         key = env->GetStringUTFChars(key_, 0);
     }
     if(plainText_ == NULL) {
-        LOG_I("plain text can not be null");
+        if(isDebug)
+            LOG_I("plain text can not be null");
         return -1;
     }
     jbyte *plainText = env->GetByteArrayElements(plainText_, JNI_FALSE);
 //    jsize textLen = env->GetArrayLength(plainText_);
-    LOG_I("encrypt plainText = %s", plainText);
+    if(isDebug)
+        LOG_I("encrypt plainText = %s", plainText);
     // 初始化向量S
     init_S();
 
@@ -44,21 +47,23 @@ Java_com_jiangdg_natives_RC4Utils_nativeRc4Encrypt(JNIEnv *env, jclass type, jst
     premute_S();
 
     // 生成密钥流，长度与明文长度一样
-    int * keyStream = (int *) malloc(len * sizeof(int));
-    memset(keyStream, 0, len * sizeof(int));
+    char * keyStream = (char *) malloc(len * sizeof(char));
+    memset(keyStream, 0, len * sizeof(char));
     create_key_stream(keyStream, len);
 
     // 使用密钥流对明文加密(异或处理)
     char * cryptText = (char *) malloc(len * sizeof(char));
     memset(cryptText, 0, len * sizeof(char));
     for(int i = 0; i< len; i++) {
-        cryptText[i] = char(keyStream[i] ^ plainText[i+start]);
+        cryptText[i] = keyStream[i] ^ plainText[i+start];
     }
-    LOG_I("encrypt cryptText = %s /////len=%d", cryptText, strlen(cryptText));
+    if(isDebug)
+        LOG_I("encrypt cryptText = %s /////len=%d", cryptText, strlen(cryptText));
     memcpy(plainText+start, cryptText, len);
     free(cryptText);
     free(keyStream);
-    LOG_I("encrypt text over");
+    if(isDebug)
+        LOG_I("encrypt text over");
     if(key_ != NULL) {
         env->ReleaseStringUTFChars(key_, key);
     }
@@ -75,7 +80,8 @@ Java_com_jiangdg_natives_RC4Utils_nativeRC4Decrypt(JNIEnv *env, jclass type, jst
         key = env->GetStringUTFChars(key_, 0);
     }
     if(cipherText_ == NULL) {
-        LOG_I("cipher text can not be null");
+        if(isDebug)
+            LOG_I("cipher text can not be null");
         return -1;
     }
     jbyte *cipherText = env->GetByteArrayElements(cipherText_, JNI_FALSE);
@@ -91,21 +97,23 @@ Java_com_jiangdg_natives_RC4Utils_nativeRC4Decrypt(JNIEnv *env, jclass type, jst
     premute_S();
 
     // 生成密钥流，长度与密文长度一样
-    int * keyStream = (int *) malloc(len * sizeof(int));
-    memset(keyStream, 0, len * sizeof(int));
+    char * keyStream = (char *) malloc(len * sizeof(char));
+    memset(keyStream, 0, len * sizeof(char));
     create_key_stream(keyStream, len);
 
     // 使用密钥流对密文解密(异或处理)
     char * plainText = (char *) malloc(len * sizeof(char));
     memset(plainText, 0, len * sizeof(char));
     for(int i = 0; i< len; i++) {
-        plainText[i] = char(keyStream[i] ^ cipherText[i+start]);
+        plainText[i] = keyStream[i] ^ cipherText[i+start];
     }
-    LOG_I("decrypt plainText = %s", plainText);
+    if(isDebug)
+        LOG_I("decrypt plainText = %s", plainText);
     memcpy(cipherText+start, plainText, len);
     free(plainText);
     free(keyStream);
-    LOG_I("decrypt text over");
+    if(isDebug)
+        LOG_I("decrypt text over");
     if(key_ != NULL) {
         env->ReleaseStringUTFChars(key_, key);
     }
@@ -122,14 +130,16 @@ void init_S() {
 
 void init_key(const char *key) {
     if(key) {
-        LOG_I("使用用户输入密钥");
+        if(isDebug)
+            LOG_I("使用用户输入密钥");
         int key_len = strlen(key);
         // 将key按字节循环填充到向量T
         for(int i=0; i<256; i++) {
             T[i] = key[i % key_len];
         }
     } else {
-        LOG_I("使用默认密钥");
+        if(isDebug)
+            LOG_I("使用默认密钥");
         // 将key_default按字节循环填充到向量T
         int key_len = strlen(key_default);
         for(int i=0; i<256; i++) {
@@ -140,7 +150,7 @@ void init_key(const char *key) {
 
 
 void premute_S() {
-    int temp;
+    char temp;
     int j = 0;
     // 打乱向量S，保证每个字节都得到处理
     for (int i = 0; i < 256; i++) {
@@ -152,10 +162,10 @@ void premute_S() {
 }
 
 
-void create_key_stream(int *keyStream, int textLen) {
+void create_key_stream(char *keyStream, int textLen) {
     int i=0, j=0;
     int index=0, t = 0;
-    int temp = 0;
+    char temp = 0;
     while (textLen --) {
         i = (i + 1) % 256;
         j = (j + S[i]) % 256;

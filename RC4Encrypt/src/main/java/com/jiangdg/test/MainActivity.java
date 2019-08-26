@@ -49,7 +49,8 @@ public class MainActivity extends AppCompatActivity implements H264EncodeThread.
             // 关闭编码线程
             if(mEncodeThread != null) {
                 mEncodeThread.exit();
-
+                mEncodeThread.setOnEncodeResultListener(null);
+                mEncodeThread = null;
                 Thread t = mEncodeThread;
                 if(t != null) {
                     mEncodeThread = null;
@@ -86,7 +87,8 @@ public class MainActivity extends AppCompatActivity implements H264EncodeThread.
             // 关闭解码线程
             if(mDecodeThread != null) {
                 mDecodeThread.exit();
-
+                mDecodeThread.setRenderSurface(null);
+                mDecodeThread = null;
                 Thread dt = mDecodeThread;
                 if(dt != null) {
                     mDecodeThread = null;
