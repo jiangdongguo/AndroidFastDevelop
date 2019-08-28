@@ -13,13 +13,21 @@
         android:text="打开相册"
         android:onClick="onBtnOpenPics"/>
 
-    <ImageView
-        android:id="@+id/iv_old"
-        android:layout_width="200dp"
-        android:layout_height="250dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="原生编码方式"/>
 
     <ImageView
-        android:id="@+id/iv_new"
+        android:id="@+id/iv_android_compress"
+        android:layout_width="200dp"
+        android:layout_height="250dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Haffman编码方式"/>
+    <ImageView
+        android:id="@+id/iv_haffman_compress"
         android:layout_marginTop="20dp"
         android:layout_width="200dp"
         android:layout_height="250dp" />

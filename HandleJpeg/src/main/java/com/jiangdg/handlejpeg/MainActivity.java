@@ -22,21 +22,26 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.jiangdg.natives.JPEGUtils;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_IMAGE_OP = 11;
-    private ImageView mIvOld;
-    private ImageView mIvNew;
+    private ImageView mIvAndrCompress;
+    private ImageView mIvHaffCompress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mIvOld = findViewById(R.id.iv_old);
-        mIvNew = findViewById(R.id.iv_new);
+        mIvAndrCompress = findViewById(R.id.iv_android_compress);
+        mIvHaffCompress = findViewById(R.id.iv_haffman_compress);
     }
 
     public void onBtnOpenPics(View view) {
@@ -51,7 +56,8 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_IMAGE_OP && resultCode == RESULT_OK) {
             Uri uri = data.getData();
-            final String output = Environment.getExternalStorageDirectory().getAbsolutePath() + "/222.jpg";
+            final String output = Environment.getExternalStorageDirectory().getAbsolutePath() + "/compress_haffman.jpg";
+            final String output1 = Environment.getExternalStorageDirectory().getAbsolutePath() + "/compress_android.jpg";
             File file = new File(output);
             if(file.exists()) {
                 file.delete();
@@ -59,8 +65,24 @@ public class MainActivity extends AppCompatActivity {
             if(uri != null) {
                 final String picPath = getPath(uri);
                 if(! TextUtils.isEmpty(picPath)) {
-                    Glide.with(MainActivity.this).load(picPath).into(mIvOld);
-
+                    // 使用自带压缩
+                    File file1 = new File(output1);
+                    Bitmap bitmap1 = BitmapFactory.decodeFile(picPath);
+                    BufferedOutputStream bos = null;
+                    try {
+                        bos = new BufferedOutputStream(new FileOutputStream(file1));
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    bitmap1.compress(Bitmap.CompressFormat.JPEG, 40, bos);
+                    try {
+                        bos.flush();
+                        bos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Glide.with(MainActivity.this).load(output1).into(mIvAndrCompress);
+                    // 使用Haffman算法压缩
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -71,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Glide.with(MainActivity.this).load(output).into(mIvNew);
+                                        Glide.with(MainActivity.this).load(output).into(mIvHaffCompress);
                                     }
                                 });
                             }
