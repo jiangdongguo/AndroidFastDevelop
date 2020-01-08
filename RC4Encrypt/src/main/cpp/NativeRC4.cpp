@@ -13,11 +13,12 @@ void init_S();
 void init_key(const char *key);
 void premute_S();
 void create_key_stream(char *keyStream, int lenBytes);
+const char *jstringToString(JNIEnv *pEnv, jstring pJstring);
 
 char S[256]; // 向量S
 char T[256]; // 向量T
-bool isDebug = true;
-const char *key_default = "jiangdongguo"; // 默认密钥
+bool isDebug = false;
+const char *key_default = "teligen@jiangdg"; // 默认密钥
 
 
 extern "C"
@@ -26,7 +27,7 @@ Java_com_jiangdg_natives_RC4Utils_nativeRc4Encrypt(JNIEnv *env, jclass type, jst
                                                    jbyteArray plainText_, jint start, jint len) {
     const char *key = NULL;
     if(key_ != NULL) {
-        key = env->GetStringUTFChars(key_, 0);
+        key = jstringToString(env, key_);
     }
     if(plainText_ == NULL) {
         if(isDebug)
@@ -77,7 +78,7 @@ Java_com_jiangdg_natives_RC4Utils_nativeRC4Decrypt(JNIEnv *env, jclass type, jst
                                                    jbyteArray cipherText_, jint start, jint len) {
     const char *key = NULL;
     if(key_ != NULL) {
-        key = env->GetStringUTFChars(key_, 0);
+        key = jstringToString(env,key_);
     }
     if(cipherText_ == NULL) {
         if(isDebug)
@@ -121,6 +122,19 @@ Java_com_jiangdg_natives_RC4Utils_nativeRC4Decrypt(JNIEnv *env, jclass type, jst
     return 0;
 }
 
+const char *jstringToString(JNIEnv *env, jstring j_str) {
+    const char * c_str = env->GetStringUTFChars(j_str, JNI_FALSE);
+    int len = env->GetStringLength(j_str);
+    char * ret;
+    if(c_str) {
+        ret = (char *)malloc(len + 1);
+        memcpy(ret, c_str, len);
+        ret[len] = 0;
+    }
+    env->ReleaseStringUTFChars(j_str, c_str);
+    return ret;
+}
+
 
 void init_S() {
     for(int i=0; i<256; i++) {
@@ -150,14 +164,17 @@ void init_key(const char *key) {
 
 
 void premute_S() {
-    char temp;
     int j = 0;
     // 打乱向量S，保证每个字节都得到处理
     for (int i = 0; i < 256; i++) {
         j = (j + S[i] + T[i]) % 256;
-        temp = S[i];
-        S[i] = S[j];
-        S[j] = temp;
+//        temp = S[i];
+//        S[i] = S[j];
+//        S[j] = temp;
+        int temp = 0;
+        temp = S[j];
+        S[j] = S[i];
+        S[i] = temp;
     }
 }
 
@@ -165,14 +182,18 @@ void premute_S() {
 void create_key_stream(char *keyStream, int textLen) {
     int i=0, j=0;
     int index=0, t = 0;
-    char temp = 0;
+//    char temp = 0;
     while (textLen --) {
         i = (i + 1) % 256;
         j = (j + S[i]) % 256;
         // 置换向量S
-        temp = S[i];
-        S[i] = S[j];
-        S[j] = temp;
+//        temp = S[i];
+//        S[i] = S[j];
+//        S[j] = temp;
+        int tmp = 0;
+        tmp = S[j];
+        S[j] = S[i];
+        S[i] = tmp;
         // 生成密钥流
         t = (S[i] + S[j]) % 256;
         keyStream[index] = S[t];

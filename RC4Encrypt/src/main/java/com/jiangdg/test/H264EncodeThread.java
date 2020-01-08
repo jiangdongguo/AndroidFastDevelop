@@ -55,7 +55,7 @@ public class H264EncodeThread extends Thread{
             releaseEncodeCodec();
         }
         initEncodeCodec();
-        FileUtils.createfile(Environment.getExternalStorageDirectory().getAbsolutePath()+"/8888.264");
+//        FileUtils.createfile(Environment.getExternalStorageDirectory().getAbsolutePath()+"/8888.264");
         while (!isExit && mEncodeCodec!=null) {
             // 根据下标获取输入缓存区，并向缓存区写入原始帧
             // 然后将缓存区提交给编码器
@@ -78,8 +78,8 @@ public class H264EncodeThread extends Thread{
             }
             // 根据下标获取输出缓存区，读取编码后数据
             // 有可能存储在几块缓存区
-            byte[] ppsSps = new byte[0];
             MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+            byte[] ppsSps = new byte[0];
             int outputIndex;
             do {
                 outputIndex = mEncodeCodec.dequeueOutputBuffer(bufferInfo, TIMESOUTUS);
@@ -101,7 +101,6 @@ public class H264EncodeThread extends Thread{
                         // 关键帧的起始码通常为0001,加上NALU头，即5个字节
                         int countStartHeader = 5;
                         int naluType = outputBuffer.get(4) & 0x1F;
-
                         if(naluType == 7 || naluType == 8) {
                             ppsSps = outData;
                         } else if(naluType == 5) {
@@ -114,7 +113,6 @@ public class H264EncodeThread extends Thread{
                             outData = iframeData;
                         } else if(naluType == 1){
                             // 加密非关键帧负载
-                            // 注：尝试对非关键字加密，解密解码渲染会出现马赛克，这里自己还没有想清楚原因
 //                            RC4Utils.rc4EncryptData(outData, countStartHeader, outData.length-countStartHeader);
                         }
                         // 将编码H264数据回调

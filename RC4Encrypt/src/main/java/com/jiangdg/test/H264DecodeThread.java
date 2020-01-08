@@ -56,15 +56,13 @@ public class H264DecodeThread extends Thread {
                         e.printStackTrace();
                     }
                     // 判断关键帧和非关键帧，解密后，再解码
+                    //  || type == 1
                     if(h264.length > 0) {
                         int type = h264[4] & 0x1F;
                         int countStartHeader = 5;
                         if(type == 5) {
                             RC4Utils.rc4DecryptData(h264, countStartHeader, h264.length-countStartHeader);
                         }
-//                        if(type == 5 || type == 1) {
-//                            RC4Utils.rc4DecryptData(h264, countStartHeader, h264.length-countStartHeader);
-//                        }
 
                         // 将数据写入缓存区，然后再提交到解码器
                         inputBuffer.clear();
